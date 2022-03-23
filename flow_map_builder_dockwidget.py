@@ -27,6 +27,8 @@ import os
 from qgis.PyQt import QtGui, QtWidgets, uic
 from qgis.PyQt.QtCore import pyqtSignal
 
+from flow_mapper.flow_mapper.ioqgis import do_with_qgis as do
+
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'flow_map_builder_dockwidget_base.ui'))
 
@@ -44,6 +46,18 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         # http://doc.qt.io/qt-5/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+        self.out_path.textChanged[str].connect(self.editingFinished)
+        self.do_main.clicked.connect(self.run)
+
+    def set_iface(self, iface):
+        self.iface = iface
+        return
+
+    def editingFinished(self, text):
+        self.path = text
+
+    def run(self):
+        do(self.iface, self.path)
 
     def closeEvent(self, event):
         self.closingPlugin.emit()
