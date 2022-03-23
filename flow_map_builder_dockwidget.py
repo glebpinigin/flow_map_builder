@@ -27,7 +27,7 @@ import os
 from qgis.PyQt import QtGui, QtWidgets, uic
 from qgis.PyQt.QtCore import pyqtSignal
 
-from flow_mapper.flow_mapper.ioqgis import do_with_qgis as do
+from .flow_mapper.flow_mapper.ioqgis.do_with_qgis import do
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'flow_map_builder_dockwidget_base.ui'))
