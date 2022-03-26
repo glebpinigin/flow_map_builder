@@ -27,6 +27,8 @@ import os
 from qgis.PyQt import QtGui, QtWidgets, uic
 from qgis.PyQt.QtCore import pyqtSignal
 
+from qgis.utils import iface
+
 from .flow_mapper.flow_mapper.ioqgis.do_with_qgis import do
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
@@ -54,7 +56,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.path = text
 
     def run(self):
-        do(self.path)
+        do(iface.activeLayer(), "")
 
     def closeEvent(self, event):
         self.closingPlugin.emit()
