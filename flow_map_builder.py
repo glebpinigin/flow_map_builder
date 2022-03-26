@@ -222,7 +222,6 @@ class FlowMapBuilder:
             if self.dockwidget == None:
                 # Create the dockwidget (after translation) and keep reference
                 self.dockwidget = FlowMapBuilderDockWidget()
-                self.dockwidget.set_iface(self.iface)
 
             # connect to provide cleanup on closing of dockwidget
             self.dockwidget.closingPlugin.connect(self.onClosePlugin)

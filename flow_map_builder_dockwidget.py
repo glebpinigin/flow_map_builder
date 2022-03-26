@@ -49,15 +49,12 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.out_path.textChanged[str].connect(self.editingFinished)
         self.do_main.clicked.connect(self.run)
 
-    def set_iface(self, iface):
-        self.iface = iface
-        return
 
     def editingFinished(self, text):
         self.path = text
 
     def run(self):
-        do(self.iface, self.path)
+        do(self.path)
 
     def closeEvent(self, event):
         self.closingPlugin.emit()
