@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>232</width>
-    <height>141</height>
+    <width>653</width>
+    <height>592</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,37 +16,170 @@
   <widget class="QWidget" name="dockWidgetContents">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <widget class="QLineEdit" name="out_path">
-      <property name="inputMask">
-       <string/>
-      </property>
-      <property name="text">
-       <string>Output path</string>
-      </property>
-      <property name="maxLength">
-       <number>32767</number>
-      </property>
-      <property name="clearButtonEnabled">
-       <bool>false</bool>
-      </property>
-     </widget>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QComboBox" name="context_hub"/>
+      </item>
+      <item>
+       <widget class="QPushButton" name="add_tree">
+        <property name="text">
+         <string>PushButton</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item row="1" column="0">
-     <widget class="QPushButton" name="do_main">
-      <property name="text">
-       <string>Build and save flow tree</string>
-      </property>
-      <property name="checkable">
+     <widget class="QTabWidget" name="tab_widget">
+      <property name="enabled">
        <bool>false</bool>
       </property>
-      <property name="autoDefault">
-       <bool>false</bool>
+      <property name="currentIndex">
+       <number>0</number>
       </property>
+      <widget class="QWidget" name="tab_create">
+       <attribute name="title">
+        <string>Create</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QgsMapLayerComboBox" name="mMapLayerComboBox">
+          <property name="filters">
+           <set>QgsMapLayerProxyModel::PointLayer</set>
+          </property>
+          <property name="showCrs">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QgsFieldExpressionWidget" name="mFieldExpressionWidget"/>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_5">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QgsFeatureListComboBox" name="mFeatureListComboBox"/>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QgsSpinBox" name="mQgsSpinBox"/>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QgsProjectionSelectionWidget" name="mQgsProjectionSelectionWidget"/>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton">
+          <property name="text">
+           <string>PushButton</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_style">
+       <attribute name="title">
+        <string>Style</string>
+       </attribute>
+      </widget>
+      <widget class="QWidget" name="tab_save">
+       <attribute name="title">
+        <string>Save</string>
+       </attribute>
+      </widget>
      </widget>
     </item>
    </layout>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QgsFeatureListComboBox</class>
+   <extends>QComboBox</extends>
+   <header>qgsfeaturelistcombobox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QgsFieldExpressionWidget</class>
+   <extends>QWidget</extends>
+   <header>qgsfieldexpressionwidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QgsMapLayerComboBox</class>
+   <extends>QComboBox</extends>
+   <header>qgsmaplayercombobox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QgsProjectionSelectionWidget</class>
+   <extends>QWidget</extends>
+   <header>qgsprojectionselectionwidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QgsSpinBox</class>
+   <extends>QSpinBox</extends>
+   <header>qgsspinbox.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

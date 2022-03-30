@@ -29,7 +29,7 @@ from qgis.PyQt.QtCore import pyqtSignal
 
 from qgis.utils import iface
 
-from .flow_mapper.flow_mapper.ioqgis.do_with_qgis import do
+from .fm_template_models import SpiralTreeContext
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'flow_map_builder_dockwidget_base.ui'))
@@ -48,15 +48,17 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         # http://doc.qt.io/qt-5/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
-        self.out_path.textChanged[str].connect(self.editingFinished)
-        self.do_main.clicked.connect(self.run)
+        self.add_tree.clicked.connect(self.addTree)
 
 
     def editingFinished(self, text):
         self.path = text
 
-    def run(self):
-        do(iface.activeLayer(), "")
+    def addTree(self):
+        self.currentContext = SpiralTreeContext()
+        self.tab_widget.setEnabled(True)
+        
+        #self.contextHub.append(SpiralTreeContext())
 
     def closeEvent(self, event):
         self.closingPlugin.emit()
