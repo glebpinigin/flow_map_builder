@@ -77,7 +77,7 @@ class AddDialogWidget(QtWidgets.QDialog, FORM_CLASS2):
     def __init__(self, parent=None, dock=None):
         super(AddDialogWidget, self).__init__(parent)
         self.dock = dock
-        self.setupUI(self)
+        self.setupUi(self)
         self.name_area.textChanged[str].connect(self.setName)
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
