@@ -70,7 +70,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         event.accept()
 
 FORM_CLASS2, _ = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), 'flow_map_builder_dockwidget_base.ui'))
+    os.path.dirname(__file__), 'add_dialog_widget.ui'))
 
 class AddDialogWidget(QtWidgets.QDialog, FORM_CLASS2):
 
