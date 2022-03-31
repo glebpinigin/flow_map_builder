@@ -45,7 +45,7 @@
         <item>
          <widget class="QgsMapLayerComboBox" name="mMapLayerComboBox">
           <property name="filters">
-           <set>QgsMapLayerProxyModel::PointLayer</set>
+           <set>qgis.core.QgsMapLayerProxyModel.PointLayer</set>
           </property>
           <property name="showCrs">
            <bool>true</bool>
