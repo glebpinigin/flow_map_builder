@@ -54,7 +54,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.layer_combobox.layerChanged.connect(self.layerChanged)
         self.expression_field.fieldChanged.connect(self.expressionChanged)
         self.fields_combobox.fieldChanged.connect(self.fieldChanged)
-        self.alpha_spinbox.valueChanged.connect(self.alphaChanged)
+        self.alpha_spin_box.valueChanged.connect(self.alphaChanged)
         
         self.contexts = []
 
