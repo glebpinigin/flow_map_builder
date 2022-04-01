@@ -76,7 +76,14 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             pass
     
     def currentContextChanged(self, index):
+        # TODO: Проверить написание функций по документации
         self.currentContext = self.contexts[index]
+        self.layer_combobox.setLayer(self.currentContext.lyr)
+        self.expression_field.setField(self.currentContext.expr)
+        self.fields_combobox.setField(self.currentContext.vol_flds)
+        self.alpha_spin_box.setValue(self.currentContext.alpha)
+        self.mQgsProjectionSelectionWidget.setCrs(self.currentContext.proj)
+        self.currentContext.log()
     
     def layerChanged(self, lyr):
         self.currentContext.updateContext(lyr=lyr)
