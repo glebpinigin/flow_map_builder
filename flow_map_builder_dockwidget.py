@@ -49,6 +49,13 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
         self.add_tree.clicked.connect(self.addTree)
+        self.context_hub.currentIndexChanged[int].connect(self.currentContextChanged)
+        
+        self.layer_combobox.layerChanged.connect(self.layerChanged)
+        self.expression_field.fieldChanged.connect(self.expressionChanged)
+        self.fields_combobox.fieldChanged.connect(self.fieldChanged)
+        self.alpha_spinbox.valueChanged.connect(self.alphaChanged)
+        
         self.contexts = []
 
 
@@ -62,8 +69,29 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             self.currentContext = SpiralTreeContext(namestring=dlg.namestring)
             self.contexts.append(self.currentContext)
             self.context_hub.addItem(str(self.currentContext))
+            self.context_hub.setCurrentIndex(len(self.contexts))
         else:
             pass
+    
+    def currentContextChanged(self, index):
+        self.currentContext = self.contexts[index]
+    
+    def layerChanged(self, lyr):
+        self.currentContext.updateContext(lyr=lyr)
+        self.expression_field.setLayer(lyr)
+        self.fields_combobox.setLayer(lyr)
+
+    def alphaChanged(self, alpha):
+        self.currentContext.updateContext(alpha=alpha)
+    
+    def expressionChanged(self, expr, valid=False):
+        if valid:
+            self.currentContext.updateContext(expr=expr)
+        else:
+            pass
+    
+    def fieldChanged(self, fieldname):
+        self.currentContext.updateContext(vol_flds=fieldname)
     
     def closeEvent(self, event):
         self.closingPlugin.emit()
