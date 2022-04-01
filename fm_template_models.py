@@ -1,3 +1,5 @@
+from qgis.core import QgsMessageLog
+
 class SpiralTreeContext:
 
     def __init__(self, namestring="", lyr=None, expr=None, vol_flds=None, alpha=25, proj=None):
@@ -17,6 +19,9 @@ class SpiralTreeContext:
         self.vol_flds = vol_flds if vol_flds is not None else self.vol_flds
         self.alpha = alpha if alpha is not None else self.alpha
         self.proj = proj if proj is not None else self.proj
+
+    def log(self):
+        QgsMessageLog.logMessage('vol_flds {}'.format(self.vol_flds))
 
     def __repr__(self):
         return self.namestring
