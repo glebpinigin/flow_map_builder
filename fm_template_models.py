@@ -19,10 +19,9 @@ class SpiralTreeContext:
         self.vol_flds = vol_flds if vol_flds is not None else self.vol_flds
         self.alpha = alpha if alpha is not None else self.alpha
         self.proj = proj if proj is not None else self.proj
-        self.log()
 
     def log(self):
-        QgsMessageLog.logMessage('vol_flds {}'.format(self.vol_flds))
+        QgsMessageLog.logMessage(f'namestring {self.namestring}\nlyr {self.lyr}\nexpr {self.expr}\nvol_flds {self.vol_flds}\nalpha {self.alpha}\nproj {self.proj}')
 
     def __repr__(self):
         return self.namestring

@@ -55,6 +55,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.expression_field.fieldChanged.connect(self.expressionChanged)
         self.fields_combobox.fieldChanged.connect(self.fieldChanged)
         self.alpha_spin_box.valueChanged.connect(self.alphaChanged)
+        self.mQgsProjectionSelectionWidget.crsChanged.connect(self.crsChanged)
         
         self.contexts = []
 
@@ -70,6 +71,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             self.contexts.append(self.currentContext)
             self.context_hub.addItem(str(self.currentContext))
             self.context_hub.setCurrentIndex(len(self.contexts))
+            self.mQgsProjectionSelectionWidget.setCrs(iface.mapCanvas().mapSettings().destinationCrs())
         else:
             pass
     
@@ -93,6 +95,9 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     def fieldChanged(self, fieldname):
         self.currentContext.updateContext(vol_flds=fieldname)
     
+    def crsChanged(self, crs):
+        self.currentContext.updateContext(proj=crs)
+
     def closeEvent(self, event):
         self.closingPlugin.emit()
         event.accept()
