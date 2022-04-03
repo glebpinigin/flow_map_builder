@@ -67,16 +67,14 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         dlg = AddDialogWidget(dock=self)
         if dlg.exec():
             self.tab_widget.setEnabled(True)
-            self.currentContext = SpiralTreeContext(namestring=dlg.namestring)
+            self.currentContext = SpiralTreeContext(namestring=dlg.namestring, proj=iface.mapCanvas().mapSettings().destinationCrs())
             self.contexts.append(self.currentContext)
             self.context_hub.addItem(str(self.currentContext))
             self.context_hub.setCurrentIndex(len(self.contexts))
-            self.mQgsProjectionSelectionWidget.setCrs(iface.mapCanvas().mapSettings().destinationCrs())
         else:
             pass
     
     def currentContextChanged(self, index):
-        # TODO: Проверить написание функций по документации
         self.currentContext = self.contexts[index]
         self.layer_combobox.setLayer(self.currentContext.lyr)
         self.expression_field.setField(self.currentContext.expr)
