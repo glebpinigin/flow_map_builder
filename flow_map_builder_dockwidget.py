@@ -52,7 +52,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.context_hub.currentIndexChanged[int].connect(self.currentContextChanged)
         
         self.layer_combobox.layerChanged.connect(self.layerChanged)
-        self.expression_field.fieldChanged.connect(self.expressionChanged)
+        self.expression_field.fieldChanged[str, bool].connect(self.expressionChanged)
         self.fields_combobox.fieldChanged.connect(self.fieldChanged)
         self.alpha_spin_box.valueChanged.connect(self.alphaChanged)
         self.mQgsProjectionSelectionWidget.crsChanged.connect(self.crsChanged)
@@ -70,7 +70,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             self.currentContext = SpiralTreeContext(namestring=dlg.namestring, proj=iface.mapCanvas().mapSettings().destinationCrs())
             self.contexts.append(self.currentContext)
             self.context_hub.addItem(str(self.currentContext))
-            self.context_hub.setCurrentIndex(len(self.contexts))
+            self.context_hub.setCurrentIndex(len(self.contexts)-1)
         else:
             pass
     
