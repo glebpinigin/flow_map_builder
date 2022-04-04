@@ -166,7 +166,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="QPushButton" name="push_button">
+         <widget class="QPushButton" name="build_button">
           <property name="text">
            <string>Build Flow Tree</string>
           </property>

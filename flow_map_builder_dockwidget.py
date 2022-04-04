@@ -28,8 +28,10 @@ from qgis.PyQt import QtGui, QtWidgets, uic
 from qgis.PyQt.QtCore import pyqtSignal
 
 from qgis.utils import iface
+from qgis.core import QgsProject
 
 from .fm_template_models import SpiralTreeContext
+from .flow_mapper.flow_mapper.ioqgis.do_with_qgis import do
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'flow_map_builder_dockwidget_base.ui'))
@@ -59,9 +61,16 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         
         self.contexts = []
 
+        self.build_button.clicked.connect(self.buildTree)
 
-    def editingFinished(self, text):
-        self.path = text
+    def buildTree(self):
+        if not self.currentContext.isCreated():
+            kwargs = self.currentContext.getCreationKwargs()
+            out_lyr = do(**kwargs)
+            self.currentContext.setOutLyr(out_lyr)
+            QgsProject.instance().addMapLayer(out_lyr)
+        else:
+            pass
 
     def addTree(self):
         dlg = AddDialogWidget(dock=self)
@@ -84,24 +93,24 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.currentContext.log()
     
     def layerChanged(self, lyr):
-        self.currentContext.updateContext(lyr=lyr)
+        self.currentContext.updateCreateContext(lyr=lyr)
         self.expression_field.setLayer(lyr)
         self.fields_combobox.setLayer(lyr)
 
     def alphaChanged(self, alpha):
-        self.currentContext.updateContext(alpha=alpha)
+        self.currentContext.updateCreateContext(alpha=alpha)
     
     def expressionChanged(self, expr, valid=False):
         if valid:
-            self.currentContext.updateContext(expr=expr)
+            self.currentContext.updateCreateContext(expr=expr)
         else:
             pass
     
     def fieldChanged(self, fieldname):
-        self.currentContext.updateContext(vol_flds=fieldname)
+        self.currentContext.updateCreateContext(vol_flds=fieldname)
     
     def crsChanged(self, crs):
-        self.currentContext.updateContext(proj=crs)
+        self.currentContext.updateCreateContext(proj=crs)
 
     def closeEvent(self, event):
         self.closingPlugin.emit()
