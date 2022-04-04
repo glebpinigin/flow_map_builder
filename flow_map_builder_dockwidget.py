@@ -71,7 +71,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             QgsProject.instance().addMapLayer(out_lyr)
         else:
             try:
-                QgsProject.instance().removeMapLayer(self.currentContext.lyr)
+                QgsProject.instance().removeMapLayer(self.currentContext.out_lyr)
             except RuntimeError:
                 pass
             kwargs = self.currentContext.getCreationKwargs()
