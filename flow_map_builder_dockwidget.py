@@ -70,7 +70,16 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             self.currentContext.setOutLyr(out_lyr)
             QgsProject.instance().addMapLayer(out_lyr)
         else:
-            pass
+            try:
+                QgsProject.instance().removeMapLayer(self.currentContext.lyr)
+            except RuntimeError:
+                pass
+            kwargs = self.currentContext.getCreationKwargs()
+            out_lyr = do(**kwargs)
+            self.currentContext.setOutLyr(out_lyr)
+            QgsProject.instance().addMapLayer(out_lyr)
+
+
 
     def addTree(self):
         dlg = AddDialogWidget(dock=self)
