@@ -28,7 +28,7 @@ from qgis.PyQt import QtGui, QtWidgets, uic
 from qgis.PyQt.QtCore import pyqtSignal
 
 from qgis.utils import iface
-from qgis.core import QgsProject
+from qgis.core import QgsProject, QgsGeometryGeneratorSymbolLayer, QgsLineSymbol, QgsSingleSymbolRenderer
 
 from .fm_template_models import SpiralTreeContext
 from .flow_mapper.flow_mapper.ioqgis.do_with_qgis import do
@@ -50,18 +50,27 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         # http://doc.qt.io/qt-5/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+        # header connections
         self.add_tree.clicked.connect(self.addTree)
         self.context_hub.currentIndexChanged[int].connect(self.currentContextChanged)
         
+        # first tab connections
         self.layer_combobox.layerChanged.connect(self.layerChanged)
         self.expression_field.fieldChanged[str, bool].connect(self.expressionChanged)
         self.fields_combobox.checkedItemsChanged.connect(self.fieldChanged)
         self.alpha_spin_box.valueChanged.connect(self.alphaChanged)
         self.mQgsProjectionSelectionWidget.crsChanged.connect(self.crsChanged)
-        
-        self.contexts = []
-
         self.build_button.clicked.connect(self.buildTree)
+
+        # second tab connections
+        self.display_field_combobox.fieldChanged.connect(self.displayFieldChanged)
+        self.color_selector.colorChanged.connect(self.colorChanged)
+        self.buffer_coef.valueChanged.connect(self.bufferCoefChanged)
+        self.unit_selector.changed.connect(self.unitTypeChanged)
+        self.style_button.clicked.connect(self.symbolizeLayer())
+
+        # attributes
+        self.contexts = []
 
     def buildTree(self):
         if not self.currentContext.isCreated():
@@ -69,6 +78,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             out_lyr = do(**kwargs)
             self.currentContext.setOutLyr(out_lyr)
             QgsProject.instance().addMapLayer(out_lyr)
+            self.currentContext.updateStyleContext(color=out_lyr.renderer().symbol().color())
         else:
             try:
                 QgsProject.instance().removeMapLayer(self.currentContext.out_lyr)
@@ -78,6 +88,13 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             out_lyr = do(**kwargs)
             self.currentContext.setOutLyr(out_lyr)
             QgsProject.instance().addMapLayer(out_lyr)
+        self.display_field_combobox.setLayer(out_lyr)
+        if not self.currentContext.isStyled():
+            out_lyr.renderer().symbol().setColor(self.currentContext.color)
+            out_lyr.triggerRepaint()
+        else:
+            out_lyr.setRenderer(QgsSingleSymbolRenderer(self.currentContext.symbol))
+            out_lyr.triggerRepaint()
 
 
 
@@ -128,6 +145,33 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     
     def crsChanged(self, crs):
         self.currentContext.updateCreateContext(proj=crs)
+
+    def displayFieldChanged(self, field):
+        self.currentContext.updateStyleContext(display_fld=field)
+    
+    def colorChanged(self, color):
+        self.currentContext.updateStyleContext(color=color)
+    
+    def bufferCoefChanged(self, coef):
+        self.currentContext.updateStyleContext(coef=coef)
+
+    def unitTypeChanged(self, unit):
+        self.currentContext.updateStyleContext(units=unit)
+
+    def symbolizeLayer(self):
+        fld = self.currentContext.display_fld.name()
+        coef = self.currentContext.coef
+        expression = f"buffer($geometry, \"{fld}\"/{coef})"
+        generator = QgsGeometryGeneratorSymbolLayer.create({})
+        generator.setGeometryExpression(expression)
+        symbol = QgsLineSymbol()
+        symbol.changeSymbolLayer(0, generator)
+        symbol.setColor(self.currentContext.color)
+
+        self.currentContext.setSymbol(symbol)
+
+        self.currentContext.out_lyr.setRenderer(QgsSingleSymbolRenderer(symbol))
+        self.currentContext.out_lyr.triggerRepaint()
 
     def closeEvent(self, event):
         self.closingPlugin.emit()
