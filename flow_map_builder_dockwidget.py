@@ -94,9 +94,9 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     
     def currentContextChanged(self, index):
         self.currentContext = self.contexts[index]
+        self.fields_combobox.clear() # needs to be cleared first. Fills up in setLayer() method
         self.layer_combobox.setLayer(self.currentContext.lyr)
         self.expression_field.setField(self.currentContext.expr)
-        
         self.alpha_spin_box.setValue(self.currentContext.alpha)
         self.mQgsProjectionSelectionWidget.setCrs(self.currentContext.proj)
         self.currentContext.log()
