@@ -6,7 +6,7 @@ class SpiralTreeContext:
         self.namestring = namestring
         self.lyr = lyr
         self.expr = expr
-        self.vol_flds = vol_flds
+        self.vol_flds = vol_flds if vol_flds is not None else []
         self.alpha = alpha
         self.proj = proj
         self.created = False

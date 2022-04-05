@@ -95,16 +95,12 @@
         <item>
          <widget class="QLabel" name="label_3">
           <property name="text">
-           <string>Field Used for Volume Calculating</string>
+           <string>Fields Used for Volume Calculating</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QgsFieldComboBox" name="fields_combobox">
-          <property name="allowEmptyFieldName">
-           <bool>true</bool>
-          </property>
-         </widget>
+         <widget class="QgsCheckableComboBox" name="field_combobox"/>
         </item>
         <item>
          <spacer name="verticalSpacer_4">
@@ -191,7 +187,7 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QgsFieldComboBox</class>
+   <class>QgsCheckableComboBox</class>
    <extends>QComboBox</extends>
    <header>qgis.gui</header>
   </customwidget>

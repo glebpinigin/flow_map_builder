@@ -55,7 +55,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         
         self.layer_combobox.layerChanged.connect(self.layerChanged)
         self.expression_field.fieldChanged[str, bool].connect(self.expressionChanged)
-        self.fields_combobox.fieldChanged.connect(self.fieldChanged)
+        self.fields_combobox.checkedItemsChanged[list].connect(self.fieldChanged)
         self.alpha_spin_box.valueChanged.connect(self.alphaChanged)
         self.mQgsProjectionSelectionWidget.crsChanged.connect(self.crsChanged)
         
@@ -104,7 +104,10 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     def layerChanged(self, lyr):
         self.currentContext.updateCreateContext(lyr=lyr)
         self.expression_field.setLayer(lyr)
-        self.fields_combobox.setLayer(lyr)
+        for name in lyr.fields():
+            self.fields_combobox.addItemWithCheckState(name, False)
+        self.fields_combobox.setCheckedItems(self.currentContext.vol_flds)
+
 
     def alphaChanged(self, alpha):
         self.currentContext.updateCreateContext(alpha=alpha)
@@ -115,8 +118,8 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         else:
             pass
     
-    def fieldChanged(self, fieldname):
-        self.currentContext.updateCreateContext(vol_flds=fieldname)
+    def fieldChanged(self, fieldlist):
+        self.currentContext.updateCreateContext(vol_flds=fieldlist)
     
     def crsChanged(self, crs):
         self.currentContext.updateCreateContext(proj=crs)
