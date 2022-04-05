@@ -119,6 +119,11 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.alpha_spin_box.setValue(self.currentContext.alpha)
         self.mQgsProjectionSelectionWidget.setCrs(self.currentContext.proj)
         self.currentContext.log()
+
+        if self.currentContext.isCreated():
+            self.display_field.setLayer(self.currentContext.out_lyr)
+            self.color_selector.setColor(self.currentContext.color)
+        self.buffer_coef.setValue(self.currentContext.coef)
     
     def layerChanged(self, lyr):
         self.currentContext.updateCreateContext(lyr=lyr)
@@ -159,7 +164,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.currentContext.updateStyleContext(units=unit)
 
     def symbolizeLayer(self):
-        fld = self.currentContext.display_fld.name()
+        fld = self.currentContext.display_fld
         coef = self.currentContext.coef
         expression = f"buffer($geometry, \"{fld}\"/{coef})"
         generator = QgsGeometryGeneratorSymbolLayer.create({})
