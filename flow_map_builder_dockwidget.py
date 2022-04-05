@@ -55,7 +55,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         
         self.layer_combobox.layerChanged.connect(self.layerChanged)
         self.expression_field.fieldChanged[str, bool].connect(self.expressionChanged)
-        self.fields_combobox.checkedItemsChanged[list].connect(self.fieldChanged)
+        self.fields_combobox.checkedItemsChanged.connect(self.fieldChanged)
         self.alpha_spin_box.valueChanged.connect(self.alphaChanged)
         self.mQgsProjectionSelectionWidget.crsChanged.connect(self.crsChanged)
         
