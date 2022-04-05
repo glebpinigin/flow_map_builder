@@ -96,7 +96,9 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.currentContext = self.contexts[index]
         self.layer_combobox.setLayer(self.currentContext.lyr)
         self.expression_field.setField(self.currentContext.expr)
-        self.fields_combobox.setCheckedItems(self.currentContext.vol_flds)
+        vol_flds = self.currentContext.vol_flds
+        self.fields_combobox.deselectAllOptions()
+        self.fields_combobox.setCheckedItems(vol_flds)
         self.alpha_spin_box.setValue(self.currentContext.alpha)
         self.mQgsProjectionSelectionWidget.setCrs(self.currentContext.proj)
         self.currentContext.log()
