@@ -100,7 +100,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QgsCheckableComboBox" name="field_combobox"/>
+         <widget class="QgsCheckableComboBox" name="fields_combobox"/>
         </item>
         <item>
          <spacer name="verticalSpacer_4">
