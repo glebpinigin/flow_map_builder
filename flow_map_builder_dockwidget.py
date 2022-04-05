@@ -167,17 +167,16 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     def symbolizeLayer(self):
         fld = self.currentContext.display_fld
         coef = self.currentContext.coef
-        expression = f"CASE WHEN \"type\"!=\'root-connection\' thenbuffer($geometry, \"{fld}\"/{coef} END)"
+        expression = f"CASE WHEN \"type\"!=\'root-connection\' then buffer($geometry, \"{fld}\"/{coef}) END"
         generator = QgsGeometryGeneratorSymbolLayer.create({})
         generator.setGeometryExpression(expression)
         symbol = QgsLineSymbol()
         symbol.changeSymbolLayer(0, generator)
         symbol.setColor(self.currentContext.color)
-
+        symbol.symbolLayers()[0].subSymbol().symbolLayers()[0].setStrokeStyle(0)
         self.currentContext.setSymbol(symbol)
 
         self.currentContext.out_lyr.setRenderer(QgsSingleSymbolRenderer(symbol))
-        self.currentContext.out_lyr.renderer().symbol().symbolLayers()[0].subSymbol().symbolLayers()[0].setStrokeStyle(0)
         self.currentContext.out_lyr.triggerRepaint()
 
     def closeEvent(self, event):
