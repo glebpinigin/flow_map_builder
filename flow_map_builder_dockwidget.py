@@ -104,8 +104,8 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     def layerChanged(self, lyr):
         self.currentContext.updateCreateContext(lyr=lyr)
         self.expression_field.setLayer(lyr)
-        for name in lyr.fields():
-            self.fields_combobox.addItemWithCheckState(name, False)
+        for field in lyr.fields():
+            self.fields_combobox.addItemWithCheckState(field.name(), False)
         self.fields_combobox.setCheckedItems(self.currentContext.vol_flds)
 
 
