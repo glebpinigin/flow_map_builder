@@ -91,6 +91,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.display_field_combobox.setLayer(out_lyr)
         if not self.currentContext.isStyled():
             out_lyr.renderer().symbol().setColor(self.currentContext.color)
+            self.color_selector.setColor(self.currentContext.color)
             out_lyr.triggerRepaint()
         else:
             out_lyr.setRenderer(QgsSingleSymbolRenderer(self.currentContext.symbol))
@@ -166,7 +167,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     def symbolizeLayer(self):
         fld = self.currentContext.display_fld
         coef = self.currentContext.coef
-        expression = f"buffer($geometry, \"{fld}\"/{coef})"
+        expression = f"CASE WHEN \"type\"!=\'root-connection\' thenbuffer($geometry, \"{fld}\"/{coef} END)"
         generator = QgsGeometryGeneratorSymbolLayer.create({})
         generator.setGeometryExpression(expression)
         symbol = QgsLineSymbol()
@@ -176,6 +177,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.currentContext.setSymbol(symbol)
 
         self.currentContext.out_lyr.setRenderer(QgsSingleSymbolRenderer(symbol))
+        self.currentContext.out_lyr.renderer().symbol().symbolLayers()[0].subSymbol().symbolLayers()[0].setStrokeStyle(0)
         self.currentContext.out_lyr.triggerRepaint()
 
     def closeEvent(self, event):
