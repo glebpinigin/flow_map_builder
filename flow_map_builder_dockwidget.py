@@ -67,7 +67,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.color_selector.colorChanged.connect(self.colorChanged)
         self.buffer_coef.valueChanged.connect(self.bufferCoefChanged)
         self.unit_selector.changed.connect(self.unitTypeChanged)
-        self.style_button.clicked.connect(self.symbolizeLayer())
+        self.style_button.clicked.connect(self.symbolizeLayer)
 
         # attributes
         self.contexts = []
