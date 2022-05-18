@@ -139,6 +139,26 @@
          </spacer>
         </item>
         <item>
+         <widget class="QgsSpinBox" name="stop_dst_spin_box">
+          <property name="maximum">
+           <number>40000000</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_10">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
          <widget class="QLabel" name="label_5">
           <property name="text">
            <string>Output Projected Coordinate System</string>
@@ -259,7 +279,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QgsUnitSelectionWidget" name="unit_selector"/>
+         <widget class="QgsUnitSelectionWidget" name="unit_selector" native="true"/>
         </item>
         <item>
          <spacer name="verticalSpacer_8">

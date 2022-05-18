@@ -59,6 +59,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.expression_field.fieldChanged[str, bool].connect(self.expressionChanged)
         self.fields_combobox.checkedItemsChanged.connect(self.fieldChanged)
         self.alpha_spin_box.valueChanged.connect(self.alphaChanged)
+        self.stop_dst_spin_box.valueChanged.connect(self.stop_dstChanged)
         self.mQgsProjectionSelectionWidget.crsChanged.connect(self.crsChanged)
         self.build_button.clicked.connect(self.buildTree)
 
@@ -67,6 +68,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.color_selector.colorChanged.connect(self.colorChanged)
         self.buffer_coef.valueChanged.connect(self.bufferCoefChanged)
         self.unit_selector.changed.connect(self.unitTypeChanged)
+        # self.unit_selector.setUnits TODO: В эту функцию надо подать список из QgsUnitTypes
         self.style_button.clicked.connect(self.symbolizeLayer)
 
         # attributes
@@ -118,6 +120,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.fields_combobox.deselectAllOptions()
         self.fields_combobox.setCheckedItems(vol_flds)
         self.alpha_spin_box.setValue(self.currentContext.alpha)
+        self.stop_dst_spin_box.setValue(self.currentContext.stop_dst)
         self.mQgsProjectionSelectionWidget.setCrs(self.currentContext.proj)
         self.currentContext.log()
 
@@ -140,6 +143,9 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     def alphaChanged(self, alpha):
         self.currentContext.updateCreateContext(alpha=alpha)
     
+    def stop_dstChanged(self, stop_dst):
+        self.currentContext.updateCreateContext(stop_dst=stop_dst)
+
     def expressionChanged(self, expr, valid=False):
         if valid:
             self.currentContext.updateCreateContext(expr=expr)
