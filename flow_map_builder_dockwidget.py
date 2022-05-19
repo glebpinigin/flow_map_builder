@@ -31,7 +31,7 @@ from qgis.utils import iface
 from qgis.core import QgsProject, QgsGeometryGeneratorSymbolLayer, QgsLineSymbol, QgsSingleSymbolRenderer
 
 from .fm_template_models import SpiralTreeContext
-from .flow_mapper.flow_mapper.ioqgis.do_with_qgis import do
+from .flow_mapper.flow_mapper.io.apiqgis import do
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'flow_map_builder_dockwidget_base.ui'))
