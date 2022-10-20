@@ -64,7 +64,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.build_button.clicked.connect(self.buildTree)
 
         # second tab connections
-        self.display_field_combobox.fieldChanged.connect(self.displayFieldChanged)
+        self.display_field_combobox.checkedItemsChanged.connect(self.displayFieldChanged)
         self.color_selector.colorChanged.connect(self.colorChanged)
         self.buffer_coef.valueChanged.connect(self.bufferCoefChanged)
         self.unit_selector.changed.connect(self.unitTypeChanged)
@@ -158,8 +158,8 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     def crsChanged(self, crs):
         self.currentContext.updateCreateContext(proj=crs)
 
-    def displayFieldChanged(self, field):
-        self.currentContext.updateStyleContext(display_fld=field)
+    def displayFieldChanged(self, fieldlist):
+        self.currentContext.updateStyleContext(display_fld=fieldlist)
     
     def colorChanged(self, color):
         self.currentContext.updateStyleContext(color=color)
@@ -173,7 +173,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     def symbolizeLayer(self):
         fld = self.currentContext.display_fld
         coef = self.currentContext.coef
-        expression = f"CASE WHEN \"type\"!=\'root-connection\' then buffer($geometry, \"{fld}\"/{coef}) END"
+        expression = f"drawSpiralTree(20)"
         generator = QgsGeometryGeneratorSymbolLayer.create({})
         generator.setGeometryExpression(expression)
         symbol = QgsLineSymbol()

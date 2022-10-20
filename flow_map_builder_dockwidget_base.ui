@@ -27,6 +27,13 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QPushButton" name="pushButton_3">
+        <property name="text">
+         <string>Remove Current Flow Tree</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item row="1" column="0">
@@ -118,7 +125,7 @@
         <item>
          <widget class="QLabel" name="label_4">
           <property name="text">
-           <string>Angle of Branching</string>
+           <string>Angle of Branching (degrees)</string>
           </property>
          </widget>
         </item>
@@ -137,6 +144,13 @@
            </size>
           </property>
          </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_9">
+          <property name="text">
+           <string>Minimal distance to root connection (output CRS units)</string>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QgsSpinBox" name="stop_dst_spin_box">
@@ -206,59 +220,6 @@
          <widget class="QgsFieldComboBox" name="display_field_combobox"/>
         </item>
         <item>
-         <spacer name="verticalSpacer_7">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_6">
-          <property name="text">
-           <string>Line Color</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QgsColorButton" name="color_selector"/>
-        </item>
-        <item>
-         <spacer name="verticalSpacer_9">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_7">
-          <property name="text">
-           <string>Attribute Scaling Coefficient</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QgsDoubleSpinBox" name="buffer_coef">
-          <property name="singleStep">
-           <double>0.100000000000000</double>
-          </property>
-          <property name="value">
-           <double>0.500000000000000</double>
-          </property>
-         </widget>
-        </item>
-        <item>
          <spacer name="verticalSpacer_6">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -272,17 +233,151 @@
          </spacer>
         </item>
         <item>
-         <widget class="QLabel" name="label_8">
+         <widget class="QFrame" name="frame">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <item>
+            <layout class="QGridLayout" name="gridLayout_3">
+             <item row="4" column="0">
+              <widget class="QLineEdit" name="lineEdit_3"/>
+             </item>
+             <item row="0" column="2">
+              <widget class="QComboBox" name="comboBox">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="2">
+              <widget class="QCheckBox" name="checkBox_2">
+               <property name="text">
+                <string>Ignore 0</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QRadioButton" name="radioButton">
+               <property name="text">
+                <string>Use total flow</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLabel" name="label_10">
+               <property name="text">
+                <string>Max Flow</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="2">
+              <widget class="QPushButton" name="pushButton_2">
+               <property name="text">
+                <string>Retrieve</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QLineEdit" name="lineEdit_4"/>
+             </item>
+             <item row="0" column="1">
+              <widget class="QRadioButton" name="radioButton_2">
+               <property name="text">
+                <string>Use flow from attribute:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_6">
+               <property name="text">
+                <string>Min Flow</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLineEdit" name="lineEdit"/>
+             </item>
+             <item row="2" column="1">
+              <widget class="QLineEdit" name="lineEdit_2"/>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_11">
+               <property name="text">
+                <string>Min Width</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QLabel" name="label_12">
+               <property name="text">
+                <string>Max Width</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_8">
+             <property name="text">
+              <string>Units</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QgsUnitSelectionWidget" name="unit_selector" native="true"/>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <item>
+              <widget class="QCheckBox" name="checkBox">
+               <property name="text">
+                <string>CheckBox</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QgsSpinBox" name="mQgsSpinBox">
+               <property name="value">
+                <number>4</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QgsColorButton" name="mColorButton"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="style_button">
           <property name="text">
-           <string>Units</string>
+           <string>Style Layer</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QgsUnitSelectionWidget" name="unit_selector" native="true"/>
-        </item>
-        <item>
-         <spacer name="verticalSpacer_8">
+         <spacer name="verticalSpacer_7">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
           </property>
@@ -293,13 +388,6 @@
            </size>
           </property>
          </spacer>
-        </item>
-        <item>
-         <widget class="QPushButton" name="style_button">
-          <property name="text">
-           <string>Style Layer</string>
-          </property>
-         </widget>
         </item>
        </layout>
       </widget>
@@ -357,6 +445,11 @@
   <customwidget>
    <class>QgsSpinBox</class>
    <extends>QSpinBox</extends>
+   <header>qgis.gui</header>
+  </customwidget>
+  <customwidget>
+   <class>QgsUnitSelectionWidget</class>
+   <extends>QWidget</extends>
    <header>qgis.gui</header>
   </customwidget>
  </customwidgets>

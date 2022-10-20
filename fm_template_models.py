@@ -15,8 +15,10 @@ class SpiralTreeContext:
         self.saved = False
 
         self.display_fld = None
+        self.use_flow_attr = False
+        self.flow_attr = None
+        
         self.color = None
-        self.coef = 0.5
         self.units = None
     
     def updateCreateContext(self, namestring=None, lyr=None, expr=None, vol_flds=None, alpha=None, stop_dst=None, proj=None):
