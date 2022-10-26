@@ -31,7 +31,8 @@ from qgis.utils import iface
 from qgis.core import QgsProject, QgsGeometryGeneratorSymbolLayer, QgsLineSymbol, QgsSingleSymbolRenderer
 
 from .fm_template_models import SpiralTreeContext
-from .flow_mapper.flow_mapper.io.apiqgis import do
+
+from flowmapper import flowTreeBuildAction
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'flow_map_builder_dockwidget_base.ui'))
@@ -77,7 +78,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     def buildTree(self):
         if not self.currentContext.isCreated():
             kwargs = self.currentContext.getCreationKwargs()
-            out_lyr = do(**kwargs)
+            out_lyr = flowTreeBuildAction(**kwargs)
             self.currentContext.setOutLyr(out_lyr)
             QgsProject.instance().addMapLayer(out_lyr)
             self.currentContext.updateStyleContext(color=out_lyr.renderer().symbol().color())
@@ -87,7 +88,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             except RuntimeError:
                 pass
             kwargs = self.currentContext.getCreationKwargs()
-            out_lyr = do(**kwargs)
+            out_lyr = flowTreeBuildAction(**kwargs)
             self.currentContext.setOutLyr(out_lyr)
             QgsProject.instance().addMapLayer(out_lyr)
         self.display_field_combobox.setLayer(out_lyr)

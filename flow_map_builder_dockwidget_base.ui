@@ -447,11 +447,6 @@
    <extends>QSpinBox</extends>
    <header>qgis.gui</header>
   </customwidget>
-  <customwidget>
-   <class>QgsUnitSelectionWidget</class>
-   <extends>QWidget</extends>
-   <header>qgis.gui</header>
-  </customwidget>
  </customwidgets>
  <resources/>
  <connections/>
