@@ -23,12 +23,16 @@
 """
 
 import os
+import itertools
 
 from qgis.PyQt import QtGui, QtWidgets, uic
-from qgis.PyQt.QtCore import pyqtSignal
+from qgis.PyQt.QtCore import pyqtSignal, QVariant
 
 from qgis.utils import iface
 from qgis.core import QgsProject, QgsGeometryGeneratorSymbolLayer, QgsLineSymbol, QgsSingleSymbolRenderer
+from qgis.core import QgsExpression, QgsExpressionContext, QgsExpressionContextUtils, QgsFieldProxyModel
+from qgis.core.additions.edit import edit
+from qgis.core import QgsField, QgsProperty
 
 from .fm_template_models import SpiralTreeContext
 
@@ -61,19 +65,32 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.fields_combobox.checkedItemsChanged.connect(self.fieldChanged)
         self.alpha_spin_box.valueChanged.connect(self.alphaChanged)
         self.stop_dst_spin_box.valueChanged.connect(self.stop_dstChanged)
+        self.geom_n.valueChanged.connect(self.geomNChanged)
         self.mQgsProjectionSelectionWidget.crsChanged.connect(self.crsChanged)
         self.build_button.clicked.connect(self.buildTree)
 
         # second tab connections
-        self.display_field_combobox.checkedItemsChanged.connect(self.displayFieldChanged)
+        self.display_fields_combobox.checkedItemsChanged.connect(self.displayFieldChanged)
+        self.use_total_flow.toggled.connect(self.useTotalFlow)
+        self.use_scale_attr.toggled.connect(self.useAttr)
+        self.scale_attr.setFilters(QgsFieldProxyModel.Numeric)
+        self.scale_attr.fieldChanged.connect(self.scaleAttrChanged)
+        self.min_flow.valueChanged.connect(self.minFlowChanged)
+        self.max_flow.valueChanged.connect(self.maxFlowChanged)
+        self.min_width.valueChanged.connect(self.minWidthChanged)
+        self.max_width.valueChanged.connect(self.maxWidthChanged)
+        self.retrieve_button.clicked.connect(self.updateMinMax)
+        self.soft_scale.stateChanged.connect(self.softScaleChanged)
+        self.spline_n.valueChanged.connect(self.splineNChanged)
+        self.unit_selector.addItems(["millimeters", "points", "meters at scale"])
+        self.unit_selector.currentTextChanged.connect(self.unitsChanged)
         self.color_selector.colorChanged.connect(self.colorChanged)
-        self.buffer_coef.valueChanged.connect(self.bufferCoefChanged)
-        self.unit_selector.changed.connect(self.unitTypeChanged)
-        # self.unit_selector.setUnits TODO: В эту функцию надо подать список из QgsUnitTypes
         self.style_button.clicked.connect(self.symbolizeLayer)
 
         # attributes
         self.contexts = []
+    
+    # ---------------------------- header connections ---------------------------- #
 
     def buildTree(self):
         if not self.currentContext.isCreated():
@@ -91,7 +108,13 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             out_lyr = flowTreeBuildAction(**kwargs)
             self.currentContext.setOutLyr(out_lyr)
             QgsProject.instance().addMapLayer(out_lyr)
-        self.display_field_combobox.setLayer(out_lyr)
+            #out_lyr.updatedFields.connect. # TODO: connect with field drop checklists
+        # field comboboxes connection:
+        self.scale_attr.setLayer(self.currentContext.out_lyr)
+        self.scale_attr.setField(None)
+        self.display_fields_combobox.clear()
+        for name in self.currentContext.vol_flds:
+            self.display_fields_combobox.addItemWithCheckState(name, False)
         if not self.currentContext.isStyled():
             out_lyr.renderer().symbol().setColor(self.currentContext.color)
             self.color_selector.setColor(self.currentContext.color)
@@ -99,7 +122,6 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         else:
             out_lyr.setRenderer(QgsSingleSymbolRenderer(self.currentContext.symbol))
             out_lyr.triggerRepaint()
-
 
 
     def addTree(self):
@@ -113,6 +135,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         else:
             pass
     
+
     def currentContextChanged(self, index):
         self.currentContext = self.contexts[index]
         self.layer_combobox.setLayer(self.currentContext.lyr)
@@ -128,8 +151,10 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if self.currentContext.isCreated():
             self.display_field.setLayer(self.currentContext.out_lyr)
             self.color_selector.setColor(self.currentContext.color)
-        self.buffer_coef.setValue(self.currentContext.coef)
-    
+            self.geom_n.setValue(self.currentContext.coef)
+
+    # --------------------------- first tab connections -------------------------- #
+
     def layerChanged(self, lyr):
         self.currentContext.updateCreateContext(lyr=lyr)
         self.expression_field.setLayer(lyr)
@@ -140,13 +165,15 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             self.fields_combobox.addItemWithCheckState(field.name(), False)
         self.fields_combobox.setCheckedItems(self.currentContext.vol_flds)
 
-
     def alphaChanged(self, alpha):
         self.currentContext.updateCreateContext(alpha=alpha)
     
     def stop_dstChanged(self, stop_dst):
         self.currentContext.updateCreateContext(stop_dst=stop_dst)
-
+    
+    def geomNChanged(self, geom_n):
+        self.currentContext.updateCreateContext(geom_n=geom_n)
+    
     def expressionChanged(self, expr, valid=False):
         if valid:
             self.currentContext.updateCreateContext(expr=expr)
@@ -159,32 +186,109 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     def crsChanged(self, crs):
         self.currentContext.updateCreateContext(proj=crs)
 
-    def displayFieldChanged(self, fieldlist):
-        self.currentContext.updateStyleContext(display_fld=fieldlist)
+    # -------------------------- second tab connections -------------------------- #
+
+    def displayFieldChanged(self, display_flds):
+        self.currentContext.updateStyleContext(display_flds=display_flds)
     
+    def useTotalFlow(self, state):
+        self.currentContext.updateStyleContext(use_total_flow=state)
+        self.scale_attr.setEnabled(False)
+
+    def useAttr(self, state):
+        self.currentContext.updateStyleContext(use_scale_attr=state)
+        self.scale_attr.setEnabled(True)
+
+    def scaleAttrChanged(self, scale_attr):
+        self.currentContext.updateStyleContext(scale_attr=scale_attr)
+
+    def minFlowChanged(self, min_flow):
+        self.currentContext.updateStyleContext(min_flow=min_flow)
+
+    def maxFlowChanged(self, max_flow):
+        self.currentContext.updateStyleContext(max_flow=max_flow)
+
+    def updateMinMax(self):
+        attrname = self.currentContext.scale_attr
+        out_lyr = self.currentContext.out_lyr
+        idx = out_lyr.fields().indexFromName(attrname)
+        min, max = out_lyr.minimumAndMaximumValue(idx)
+        self.min_flow.setValue(min)
+        self.max_flow.setValue(max)
+
+    def minWidthChanged(self, min_width):
+        self.currentContext.updateStyleContext(min_width=min_width)
+
+    def maxWidthChanged(self, max_width):
+        self.currentContext.updateStyleContext(max_width=max_width)
+
+    def softScaleChanged(self, state):
+        state = True if state == 2 else False
+        self.currentContext.updateStyleContext(soft_scale=state)
+
+    def splineNChanged(self, spline_n):
+        self.currentContext.updateStyleContext(spline_n=spline_n)
+
     def colorChanged(self, color):
         self.currentContext.updateStyleContext(color=color)
-    
-    def bufferCoefChanged(self, coef):
-        self.currentContext.updateStyleContext(coef=coef)
 
-    def unitTypeChanged(self, unit):
+    def unitsChanged(self, unit):
         self.currentContext.updateStyleContext(units=unit)
 
-    def symbolizeLayer(self):
-        fld = self.currentContext.display_fld
-        coef = self.currentContext.coef
-        expression = f"drawSpiralTree(20)"
-        generator = QgsGeometryGeneratorSymbolLayer.create({})
+    @staticmethod
+    def _calculateWidthAttributes(out_lyr, display_flds, min_flow, max_flow,
+                                  min_width, max_width, soft_scale):
+        if soft_scale:
+            fun = "soft_scale_linear"
+        else:
+            fun = "scale_linear"
+        
+        pv = out_lyr.dataProvider()
+        
+        context = QgsExpressionContext()
+        context.appendScopes(QgsExpressionContextUtils.globalProjectLayerScopes(out_lyr))
+        for name in display_flds:
+            pv.addAttributes([QgsField(f"{name}_width", QVariant.Double)])
+            expr_string = f"{fun}({name}, {min_flow}, {max_flow}, {min_width}, {max_width})"
+            expression = QgsExpression(expr_string)
+            with edit(out_lyr):
+                for fet in out_lyr.getFeatures():
+                    context.setFeature(fet)
+                    fet[f"{name}_width"] = expression.evaluate(context)
+                    out_lyr.updateFeature(fet)
+
+    def calculateWidthAttributes(self):
+        kwargs = self.currentContext.getScaleKwargs()
+        self._calculateWidthAttributes(**kwargs)
+
+    @staticmethod
+    def _symbolizeLayer(out_lyr, spline_n, display_fld, units, color):
+        expression = f"drawTree( {spline_n}, get_feature( @layer, 'target', \"source\"), array('{display_fld}'), '{units}')"
+        generator = QgsGeometryGeneratorSymbolLayer.create({"SymbolType":"Line",
+                                                            "capstyle": "round"})
         generator.setGeometryExpression(expression)
         symbol = QgsLineSymbol()
         symbol.changeSymbolLayer(0, generator)
-        symbol.setColor(self.currentContext.color)
-        symbol.symbolLayers()[0].subSymbol().symbolLayers()[0].setStrokeStyle(0)
-        self.currentContext.setSymbol(symbol)
+        symbol.setColor(color)
+        #symbol.symbolLayers()[0].subSymbol().symbolLayers()[0].setStrokeStyle(0)
+        # Iterating is for 
+        # volsstr = ""
+        # for name in display_fld:
+        #     volsstr = volsstr + f"{name},"
+        expression = f"\"{display_fld}_width\""
+        symbol.symbolLayers()[0].subSymbol().setDataDefinedWidth(QgsProperty.fromExpression(expression))
+        out_lyr.setRenderer(QgsSingleSymbolRenderer(symbol))
+        out_lyr.triggerRepaint()
 
-        self.currentContext.out_lyr.setRenderer(QgsSingleSymbolRenderer(symbol))
-        self.currentContext.out_lyr.triggerRepaint()
+    def symbolizeLayer(self):
+        # TODO: конструирование выражения по примеру ниже:
+        # drawTree( 21, get_feature( @layer, 'target', "source"), array('from_texas_2005'), 'mm')
+        
+        self.calculateWidthAttributes()
+        kwargs = self.currentContext.getStyleKwargs()
+        self._symbolizeLayer(**kwargs)
+        # self.currentContext.setSymbol(symbol)
+
 
     def closeEvent(self, event):
         self.closingPlugin.emit()

@@ -173,6 +173,39 @@
          </spacer>
         </item>
         <item>
+         <widget class="QLabel" name="label_9">
+          <property name="text">
+           <string>Number of geometry vertices (4 recommended)</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QgsSpinBox" name="geom_n">
+          <property name="value">
+           <number>4</number>
+          </property>
+          <property name="minimum">
+           <number>4</number>
+          </property>
+          <property name="maximum">
+           <number>100</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_10">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
          <widget class="QLabel" name="label_5">
           <property name="text">
            <string>Output Projected Coordinate System</string>
@@ -212,12 +245,12 @@
         <item>
          <widget class="QLabel" name="label_7">
           <property name="text">
-           <string>Display Width Field</string>
+           <string>Calculate Width for Field(s):</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QgsFieldComboBox" name="display_field_combobox"/>
+         <widget class="QgsCheckableComboBox" name="display_fields_combobox"/>
         </item>
         <item>
          <spacer name="verticalSpacer_6">
@@ -243,30 +276,73 @@
           <layout class="QVBoxLayout" name="verticalLayout_3">
            <item>
             <layout class="QGridLayout" name="gridLayout_3">
-             <item row="4" column="0">
-              <widget class="QLineEdit" name="lineEdit_3"/>
-             </item>
-             <item row="0" column="2">
-              <widget class="QComboBox" name="comboBox">
-               <property name="enabled">
-                <bool>false</bool>
+             <item row="2" column="0">
+              <widget class="QgsDoubleSpinBox" name="min_flow">
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::NoButtons</enum>
+               </property>
+               <property name="decimals">
+                <number>6</number>
+               </property>
+               <property name="maximum">
+                <double>9007199254740992.000000000000000</double>
                </property>
               </widget>
              </item>
+             <item row="2" column="1">
+              <widget class="QgsDoubleSpinBox" name="max_flow">
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::NoButtons</enum>
+               </property>
+               <property name="decimals">
+                <number>6</number>
+               </property>
+               <property name="maximum">
+                <double>9007199254740992.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QgsDoubleSpinBox" name="min_width">
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::NoButtons</enum>
+               </property>
+               <property name="decimals">
+                <number>6</number>
+               </property>
+               <property name="maximum">
+                <double>9007199254740992.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QgsDoubleSpinBox" name="max_width">
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::NoButtons</enum>
+               </property>
+               <property name="decimals">
+                <number>6</number>
+               </property>
+               <property name="maximum">
+                <double>9007199254740992.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QgsFieldComboBox" name="scale_attr">
+              </widget>
+             </item>
              <item row="4" column="2">
-              <widget class="QCheckBox" name="checkBox_2">
+              <widget class="QCheckBox" name="soft_scale">
                <property name="text">
                 <string>Ignore 0</string>
                </property>
               </widget>
              </item>
              <item row="0" column="0">
-              <widget class="QRadioButton" name="radioButton">
+              <widget class="QRadioButton" name="use_total_flow">
                <property name="text">
                 <string>Use total flow</string>
-               </property>
-               <property name="checked">
-                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -281,19 +357,19 @@
               </widget>
              </item>
              <item row="2" column="2">
-              <widget class="QPushButton" name="pushButton_2">
+              <widget class="QPushButton" name="retrieve_button">
                <property name="text">
                 <string>Retrieve</string>
                </property>
               </widget>
              </item>
-             <item row="4" column="1">
-              <widget class="QLineEdit" name="lineEdit_4"/>
-             </item>
              <item row="0" column="1">
-              <widget class="QRadioButton" name="radioButton_2">
+              <widget class="QRadioButton" name="use_scale_attr">
                <property name="text">
                 <string>Use flow from attribute:</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -306,12 +382,6 @@
                 <set>Qt::AlignCenter</set>
                </property>
               </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLineEdit" name="lineEdit"/>
-             </item>
-             <item row="2" column="1">
-              <widget class="QLineEdit" name="lineEdit_2"/>
              </item>
              <item row="3" column="0">
               <widget class="QLabel" name="label_11">
@@ -343,31 +413,30 @@
             </widget>
            </item>
            <item>
-            <widget class="QgsUnitSelectionWidget" name="unit_selector" native="true"/>
+            <widget class="QComboBox" name="unit_selector" native="true"/>
            </item>
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_3">
-             <item>
-              <widget class="QCheckBox" name="checkBox">
-               <property name="text">
-                <string>CheckBox</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QgsSpinBox" name="mQgsSpinBox">
-               <property name="value">
-                <number>4</number>
-               </property>
-              </widget>
-             </item>
-            </layout>
+            <widget class="QLabel" name="label_9">
+             <property name="text">
+              <string>Number of display vertices</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QgsSpinBox" name="spline_n">
+             <property name="value">
+              <number>21</number>
+             </property>
+             <property name="minimum">
+              <number>4</number>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
         </item>
         <item>
-         <widget class="QgsColorButton" name="mColorButton"/>
+         <widget class="QgsColorButton" name="color_selector"/>
         </item>
         <item>
          <widget class="QPushButton" name="style_button">
