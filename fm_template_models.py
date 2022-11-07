@@ -22,10 +22,10 @@ class SpiralTreeContext:
         self.use_total_flow = False
         self.use_scale_attr = True
         self.scale_attr = None
-        self.min_flow = None
-        self.max_flow = None
-        self.min_width = None
-        self.max_width = None
+        self.min_flow = .0
+        self.max_flow = .0
+        self.min_width = .0
+        self.max_width = .0
         self.soft_scale = False
         self.units = "millimeters"
 

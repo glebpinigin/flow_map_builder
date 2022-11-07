@@ -21,9 +21,9 @@
  *                                                                         *
  ***************************************************************************/
 """
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, Qt
-from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction
+from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, Qt  # type: ignore
+from qgis.PyQt.QtGui import QIcon  # type: ignore
+from qgis.PyQt.QtWidgets import QAction  # type: ignore
 # Initialize Qt resources from file resources.py
 from .resources import *
 
@@ -182,7 +182,7 @@ class FlowMapBuilder:
         #print "** CLOSING FlowMapBuilder"
 
         # disconnects
-        self.dockwidget.closingPlugin.disconnect(self.onClosePlugin)
+        self.dockwidget.closingPlugin.disconnect(self.onClosePlugin)   # type: ignore
 
         # remove this statement if dockwidget is to remain
         # for reuse if plugin is reopened

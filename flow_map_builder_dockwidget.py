@@ -26,7 +26,7 @@ import os
 import itertools
 
 from qgis.PyQt import QtGui, QtWidgets, uic
-from qgis.PyQt.QtCore import pyqtSignal, QVariant
+from qgis.PyQt.QtCore import pyqtSignal, QVariant  # type: ignore
 
 from qgis.utils import iface
 from qgis.core import QgsProject, QgsGeometryGeneratorSymbolLayer, QgsLineSymbol, QgsSingleSymbolRenderer
@@ -42,7 +42,7 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'flow_map_builder_dockwidget_base.ui'))
 
 
-class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
+class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):  # type: ignore
 
     closingPlugin = pyqtSignal()
 
@@ -55,6 +55,9 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         # http://doc.qt.io/qt-5/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+
+        self.tab_style.setEnabled(False)
+        self.tab_save.setEnabled(False)
         # header connections
         self.add_tree.clicked.connect(self.addTree)
         self.context_hub.currentIndexChanged[int].connect(self.currentContextChanged)
@@ -82,7 +85,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.retrieve_button.clicked.connect(self.updateMinMax)
         self.soft_scale.stateChanged.connect(self.softScaleChanged)
         self.spline_n.valueChanged.connect(self.splineNChanged)
-        self.unit_selector.addItems(["millimeters", "points", "meters at scale"])
+        self.unit_selector.addItems(["millimeters", "points"]) # TODO: add meters at scale
         self.unit_selector.currentTextChanged.connect(self.unitsChanged)
         self.color_selector.colorChanged.connect(self.colorChanged)
         self.style_button.clicked.connect(self.symbolizeLayer)
@@ -93,6 +96,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     # ---------------------------- header connections ---------------------------- #
 
     def buildTree(self):
+        # TODO: update context after rebuild
         if not self.currentContext.isCreated():
             kwargs = self.currentContext.getCreationKwargs()
             out_lyr = flowTreeBuildAction(**kwargs)
@@ -122,6 +126,8 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         else:
             out_lyr.setRenderer(QgsSingleSymbolRenderer(self.currentContext.symbol))
             out_lyr.triggerRepaint()
+        self.tab_style.setEnabled(True)
+        self.tab_save.setEnabled(True)
 
 
     def addTree(self):
@@ -138,6 +144,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
     def currentContextChanged(self, index):
         self.currentContext = self.contexts[index]
+        # first tab independent values
         self.layer_combobox.setLayer(self.currentContext.lyr)
         self.expression_field.setField(self.currentContext.expr)
         vol_flds = self.currentContext.vol_flds
@@ -145,13 +152,29 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.fields_combobox.setCheckedItems(vol_flds)
         self.alpha_spin_box.setValue(self.currentContext.alpha)
         self.stop_dst_spin_box.setValue(self.currentContext.stop_dst)
+        self.geom_n.setValue(self.currentContext.geom_n)
         self.mQgsProjectionSelectionWidget.setCrs(self.currentContext.proj)
         self.currentContext.log()
 
+        # second tab independent values
         if self.currentContext.isCreated():
-            self.display_field.setLayer(self.currentContext.out_lyr)
+            display_flds = self.currentContext.display_flds
+            self.display_fields_combobox.clear()
+            for name in self.currentContext.vol_flds:
+                self.display_fields_combobox.addItemWithCheckState(name, False)
+            self.display_fields_combobox.setCheckedItems(display_flds)
+            self.scale_attr.setLayer(self.currentContext.out_lyr)
+            self.scale_attr.setField(self.currentContext.scale_attr)
             self.color_selector.setColor(self.currentContext.color)
-            self.geom_n.setValue(self.currentContext.coef)
+        self.min_flow.setValue(self.currentContext.min_flow)
+        self.max_flow.setValue(self.currentContext.max_flow)
+        self.min_width.setValue(self.currentContext.min_width)
+        self.max_width.setValue(self.currentContext.max_width)
+        self.soft_scale.setChecked(self.currentContext.soft_scale)
+        self.spline_n.setValue(self.currentContext.spline_n)
+        self.unit_selector.setCurrentText(self.currentContext.units)
+        self.tab_save.setEnabled(self.currentContext.isCreated())
+        self.tab_style.setEnabled(self.currentContext.isCreated())
 
     # --------------------------- first tab connections -------------------------- #
 
@@ -281,9 +304,6 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         out_lyr.triggerRepaint()
 
     def symbolizeLayer(self):
-        # TODO: конструирование выражения по примеру ниже:
-        # drawTree( 21, get_feature( @layer, 'target', "source"), array('from_texas_2005'), 'mm')
-        
         self.calculateWidthAttributes()
         kwargs = self.currentContext.getStyleKwargs()
         self._symbolizeLayer(**kwargs)
@@ -297,7 +317,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 FORM_CLASS2, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'add_dialog_widget.ui'))
 
-class AddDialogWidget(QtWidgets.QDialog, FORM_CLASS2):
+class AddDialogWidget(QtWidgets.QDialog, FORM_CLASS2):  # type: ignore
 
     def __init__(self, parent=None, dock=None):
         super(AddDialogWidget, self).__init__(parent)
