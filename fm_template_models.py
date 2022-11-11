@@ -1,16 +1,15 @@
 from qgis.core import QgsMessageLog
+from qgis.core import QgsMapLayer, QgsProject
 
 class SpiralTreeContext:
 
-    def __init__(
-            self, namestring="", lyr=None, expr=None,
-            vol_flds=None, alpha=25, proj=None, stop_dst=0):
+    def __init__(self, namestring="", proj=None):
         self.namestring = namestring
-        self.lyr = lyr
-        self.expr = expr
-        self.vol_flds = vol_flds if vol_flds is not None else []
-        self.alpha = alpha
-        self.stop_dst = stop_dst
+        self.lyr = None
+        self.expr = None
+        self.vol_flds = []
+        self.alpha = 25
+        self.stop_dst = 0
         self.geom_n = 4
         self.proj = proj
         self.created = False
@@ -114,6 +113,26 @@ class SpiralTreeContext:
             "units": self.units,
             "color": self.color
         }
+
+    def getSaveKwargs(self):
+        attrs = {}
+        for key, value in vars(self).items():
+            if isinstance(value, QgsMapLayer):
+                value = value.id()
+            attrs[key] = value
+        return attrs
+
+    @classmethod
+    def fromSaveKwargs(cls, **kwargs):
+        project = QgsProject.instance()
+        context = cls()
+        for key, value in kwargs.items():
+            if key[-3:] == "lyr":
+                value = project.mapLayer(value)
+                if value is None:
+                    raise ValueError("Layer with this ID is noot registered")
+            setattr(context, key, value)
+        return context
 
     def isCreated(self):
         return self.created

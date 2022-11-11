@@ -452,6 +452,11 @@
        <attribute name="title">
         <string>Save</string>
        </attribute>
+       <widget class="QPushButton" name="dbgbtn">
+        <property name="text">
+         <string>click or die</string>
+        </property>
+       </widget>
       </widget>
      </widget>
     </item>

@@ -22,6 +22,20 @@
     </widget>
    </item>
    <item>
+    <widget class="QCheckBox" name="unpack_state">
+     <property name="text">
+      <string>Open tree from layer</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QgsMapLayerComboBox" name="layer_check">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QLineEdit" name="name_area"/>
    </item>
    <item>
@@ -36,6 +50,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QgsMapLayerComboBox</class>
+   <extends>QComboBox</extends>
+   <header>qgis.gui</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>

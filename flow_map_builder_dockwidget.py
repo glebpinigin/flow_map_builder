@@ -45,7 +45,7 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):  # type: ignore
 
     closingPlugin = pyqtSignal()
-
+    _proproot = "fmp/"
     def __init__(self, parent=None):
         """Constructor."""
         super(FlowMapBuilderDockWidget, self).__init__(parent)
@@ -90,13 +90,15 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):  # type: igno
         self.color_selector.colorChanged.connect(self.colorChanged)
         self.style_button.clicked.connect(self.symbolizeLayer)
 
+        # third tab connections
+
+        QgsProject.instance().writeProject.connect(self.addLayerProperties)
         # attributes
         self.contexts = []
     
     # ---------------------------- header connections ---------------------------- #
 
     def buildTree(self):
-        # TODO: update context after rebuild
         if not self.currentContext.isCreated():
             kwargs = self.currentContext.getCreationKwargs()
             out_lyr = flowTreeBuildAction(**kwargs)
@@ -128,13 +130,25 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):  # type: igno
             out_lyr.triggerRepaint()
         self.tab_style.setEnabled(True)
         self.tab_save.setEnabled(True)
+        # TODO: do something if styled
 
 
     def addTree(self):
         dlg = AddDialogWidget(dock=self)
         if dlg.exec():
             self.tab_widget.setEnabled(True)
-            self.currentContext = SpiralTreeContext(namestring=dlg.namestring, proj=iface.mapCanvas().mapSettings().destinationCrs())
+            if dlg.state:
+                lyr = dlg.layer
+                props = lyr.customProperties() # type: ignore
+                kwargs = {}
+                for key in props.keys():
+                    kwarg = key[len(self._proproot):]
+                    val = props.value(key)
+                    kwargs[kwarg] = val
+                
+                self.currentContext = SpiralTreeContext.fromSaveKwargs(**kwargs)
+            else:
+                self.currentContext = SpiralTreeContext(namestring=dlg.namestring, proj=iface.mapCanvas().mapSettings().destinationCrs())
             self.contexts.append(self.currentContext)
             self.context_hub.addItem(str(self.currentContext))
             self.context_hub.setCurrentIndex(len(self.contexts)-1)
@@ -309,6 +323,14 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):  # type: igno
         self._symbolizeLayer(**kwargs)
         # self.currentContext.setSymbol(symbol)
 
+    # --------------------------- third tab connections -------------------------- #
+
+    def addLayerProperties(self, *args, **kwargs):
+        for context in self.contexts:
+            props = context.getSaveKwargs()
+            for key, value in props.items():
+                context.out_lyr.setCustomProperty(self._proproot + key, value)
+
 
     def closeEvent(self, event):
         self.closingPlugin.emit()
@@ -323,9 +345,24 @@ class AddDialogWidget(QtWidgets.QDialog, FORM_CLASS2):  # type: ignore
         super(AddDialogWidget, self).__init__(parent)
         self.dock = dock
         self.setupUi(self)
+        self.layer = None
+        self.namestring = ""
+        self.state = False
         self.name_area.textChanged[str].connect(self.setName)
+        self.unpack_state.stateChanged.connect(self.setState)
+        self.layer_check.layerChanged.connect(self.setLayer)
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
     
     def setName(self, name):
         self.namestring=name
+    
+    def setState(self, state):
+        state = True if state == 2 else False
+        self.state = state
+        self.layer_check.setEnabled(state)
+        self.name_area.setEnabled(not state)
+
+    def setLayer(self, layer):
+        self.layer = layer
+        self.setName(self.layer.name())
