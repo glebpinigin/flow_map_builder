@@ -32,7 +32,7 @@ from qgis.utils import iface
 from qgis.core import QgsProject, QgsGeometryGeneratorSymbolLayer, QgsLineSymbol, QgsSingleSymbolRenderer
 from qgis.core import QgsExpression, QgsExpressionContext, QgsExpressionContextUtils, QgsFieldProxyModel
 from qgis.core.additions.edit import edit
-from qgis.core import QgsField, QgsProperty
+from qgis.core import QgsField, QgsProperty, QgsUnitTypes
 
 from .fm_template_models import SpiralTreeContext
 
@@ -85,7 +85,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):  # type: igno
         self.retrieve_button.clicked.connect(self.updateMinMax)
         self.soft_scale.stateChanged.connect(self.softScaleChanged)
         self.spline_n.valueChanged.connect(self.splineNChanged)
-        self.unit_selector.addItems(["millimeters", "points"]) # TODO: add meters at scale
+        self.unit_selector.addItems(["mm", "points", "inch", "meters", "mapunits"])
         self.unit_selector.currentTextChanged.connect(self.unitsChanged)
         self.color_selector.colorChanged.connect(self.colorChanged)
         self.style_button.clicked.connect(self.symbolizeLayer)
@@ -116,11 +116,12 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):  # type: igno
             QgsProject.instance().addMapLayer(out_lyr)
             #out_lyr.updatedFields.connect. # TODO: connect with field drop checklists
         # field comboboxes connection:
-        self.scale_attr.setLayer(self.currentContext.out_lyr)
-        self.scale_attr.setField(None)
         self.display_fields_combobox.clear()
         for name in self.currentContext.vol_flds:
             self.display_fields_combobox.addItemWithCheckState(name, False)
+        self.display_fields_combobox.setCheckedItems(self.currentContext.display_flds)
+        self.scale_attr.setLayer(self.currentContext.out_lyr)
+        self.scale_attr.setField(self.currentContext.scale_attr)
         if not self.currentContext.isStyled():
             out_lyr.renderer().symbol().setColor(self.currentContext.color)
             self.color_selector.setColor(self.currentContext.color)
@@ -314,6 +315,8 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):  # type: igno
         #     volsstr = volsstr + f"{name},"
         expression = f"\"{display_fld}_width\""
         symbol.symbolLayers()[0].subSymbol().setDataDefinedWidth(QgsProperty.fromExpression(expression))
+        unit = QgsUnitTypes().decodeRenderUnit(units)[0]
+        symbol.symbolLayers()[0].subSymbol().setWidthUnit(unit)
         out_lyr.setRenderer(QgsSingleSymbolRenderer(symbol))
         out_lyr.triggerRepaint()
 

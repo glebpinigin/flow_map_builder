@@ -24,6 +24,7 @@
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, Qt  # type: ignore
 from qgis.PyQt.QtGui import QIcon  # type: ignore
 from qgis.PyQt.QtWidgets import QAction  # type: ignore
+from qgis.core import QgsProject
 # Initialize Qt resources from file resources.py
 from .resources import *
 
@@ -72,6 +73,8 @@ class FlowMapBuilder:
 
         self.pluginIsActive = False
         self.dockwidget = None
+
+        QgsProject.instance().cleared.connect(self.onProjectReset)
 
 
     # noinspection PyMethodMayBeStatic
@@ -192,11 +195,24 @@ class FlowMapBuilder:
 
         self.pluginIsActive = False
 
+    def onProjectReset(self):
+        if not self.dockwidget is None:
+            try:
+                QgsProject.instance().writeProject.disconnect(self.dockwidget.addLayerProperties)
+                self.dockwidget = None
+            except TypeError:
+                pass
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
 
         #print "** UNLOAD FlowMapBuilder"
+
+        self.onProjectReset()
+        try:
+            QgsProject.instance().cleared.disconnect(self.onProjectReset)
+        except TypeError:
+            pass
 
         for action in self.actions:
             self.iface.removePluginMenu(
