@@ -4,6 +4,8 @@ from qgis.core import QgsMapLayer, QgsProject
 class SpiralTreeContext:
 
     def __init__(self, namestring="", proj=None):
+        self.store_checkstate = False
+        
         self.namestring = namestring
         self.lyr = None
         self.expr = None

@@ -199,9 +199,9 @@ class FlowMapBuilder:
         if not self.dockwidget is None:
             try:
                 QgsProject.instance().writeProject.disconnect(self.dockwidget.addLayerProperties)
-                self.dockwidget = None
             except TypeError:
                 pass
+            self.dockwidget = None
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""

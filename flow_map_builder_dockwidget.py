@@ -60,8 +60,13 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):  # type: igno
         self.tab_save.setEnabled(False)
         # header connections
         self.add_tree.clicked.connect(self.addTree)
+        self.add_tree.setIcon(QtGui.QIcon(':/images/themes/default/symbologyAdd.svg'))
         self.context_hub.currentIndexChanged[int].connect(self.currentContextChanged)
-        
+        self.remove_tree.setIcon(QtGui.QIcon(':/images/themes/default/symbologyRemove.svg'))
+        self.store_btn.toggled.connect(self.saveStateChanged)
+        self.store_btn.setCheckable(True)
+        self.store_btn.setIcon(QtGui.QIcon(':/images/themes/default/mActionFileSave.svg'))
+
         # first tab connections
         self.layer_combobox.layerChanged.connect(self.layerChanged)
         self.expression_field.fieldChanged[str, bool].connect(self.expressionChanged)
@@ -90,9 +95,6 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):  # type: igno
         self.color_selector.colorChanged.connect(self.colorChanged)
         self.style_button.clicked.connect(self.symbolizeLayer)
 
-        # third tab connections
-
-        QgsProject.instance().writeProject.connect(self.addLayerProperties)
         # attributes
         self.contexts = []
     
@@ -156,10 +158,16 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):  # type: igno
         else:
             pass
     
+    def saveStateChanged(self, key):
+        if key:
+            QgsProject.instance().writeProject.connect(self.addLayerProperties)
+        else:
+            QgsProject.instance().writeProject.disconnect(self.addLayerProperties)
 
     def currentContextChanged(self, index):
         self.currentContext = self.contexts[index]
         # first tab independent values
+        self.store_btn.setChecked(self.currentContext.store_checkstate)
         self.layer_combobox.setLayer(self.currentContext.lyr)
         self.expression_field.setField(self.currentContext.expr)
         vol_flds = self.currentContext.vol_flds
