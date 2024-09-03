@@ -22,15 +22,40 @@
       </item>
       <item>
        <widget class="QPushButton" name="add_tree">
-        <property name="text">
-         <string>Add New Flow Tree</string>
+        <property name="maximumSize">
+         <size>
+          <width>50</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Load New Flow Tree</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_3">
-        <property name="text">
-         <string>Remove Current Flow Tree</string>
+       <widget class="QPushButton" name="remove_tree">
+        <property name="maximumSize">
+         <size>
+          <width>50</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Unload Current Flow Tree</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="store_btn">
+        <property name="maximumSize">
+         <size>
+          <width>50</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>If toggled, tree will be saved with every project save</string>
         </property>
        </widget>
       </item>

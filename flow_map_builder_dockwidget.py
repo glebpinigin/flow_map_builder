@@ -26,7 +26,7 @@ import os
 import itertools
 
 from qgis.PyQt import QtGui, QtWidgets, uic
-from qgis.PyQt.QtCore import pyqtSignal, QVariant  # type: ignore
+from qgis.PyQt.QtCore import pyqtSignal, QVariant, pyqtSlot
 
 from qgis.utils import iface
 from qgis.core import QgsProject, QgsGeometryGeneratorSymbolLayer, QgsLineSymbol, QgsSingleSymbolRenderer
@@ -42,12 +42,13 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'flow_map_builder_dockwidget_base.ui'))
 
 
-class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):  # type: ignore
+class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
     closingPlugin = pyqtSignal()
     _proproot = "fmp/"
     def __init__(self, parent=None):
         """Constructor."""
+        print('construction')
         super(FlowMapBuilderDockWidget, self).__init__(parent)
         # Set up the user interface from Designer.
         # After setupUI you can access any designer object by doing
@@ -60,8 +61,14 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):  # type: igno
         self.tab_save.setEnabled(False)
         # header connections
         self.add_tree.clicked.connect(self.addTree)
+        self.add_tree.setIcon(QtGui.QIcon(':/images/themes/default/symbologyAdd.svg'))
         self.context_hub.currentIndexChanged[int].connect(self.currentContextChanged)
-        
+        self.remove_tree.clicked.connect(self.removeTree)
+        self.remove_tree.setIcon(QtGui.QIcon(':/images/themes/default/symbologyRemove.svg'))
+        self.store_btn.toggled.connect(self.saveStateChanged)
+        self.store_btn.setCheckable(True)
+        self.store_btn.setIcon(QtGui.QIcon(':/images/themes/default/mActionFileSave.svg'))
+
         # first tab connections
         self.layer_combobox.layerChanged.connect(self.layerChanged)
         self.expression_field.fieldChanged[str, bool].connect(self.expressionChanged)
@@ -90,11 +97,10 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):  # type: igno
         self.color_selector.colorChanged.connect(self.colorChanged)
         self.style_button.clicked.connect(self.symbolizeLayer)
 
-        # third tab connections
-
-        QgsProject.instance().writeProject.connect(self.addLayerProperties)
         # attributes
         self.contexts = []
+
+        QgsProject.instance().cleared.connect(self.onProjectReset)
     
     # ---------------------------- header connections ---------------------------- #
 
@@ -134,8 +140,9 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):  # type: igno
         # TODO: do something if styled
 
 
+    @pyqtSlot()
     def addTree(self):
-        dlg = AddDialogWidget(dock=self)
+        dlg = AddDialogWidget(parent=self, dock=self)
         if dlg.exec():
             self.tab_widget.setEnabled(True)
             if dlg.state:
@@ -155,11 +162,32 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):  # type: igno
             self.context_hub.setCurrentIndex(len(self.contexts)-1)
         else:
             pass
+        
+        del dlg
     
+    @pyqtSlot()
+    def removeTree(self):
+        print('попытка удаления')
+        if len(self.contexts) > 1:
+            del self.currentContext
+            self.currentContext = self.contexts[-1]
+        elif len(self.contexts) == 0:
+            pass
+        else:
+            pass
 
+    @pyqtSlot()
+    def saveStateChanged(self, key):
+        if key:
+            QgsProject.instance().writeProject.connect(self.addLayerProperties)
+        else:
+            QgsProject.instance().writeProject.disconnect(self.addLayerProperties)
+
+    @pyqtSlot()
     def currentContextChanged(self, index):
         self.currentContext = self.contexts[index]
         # first tab independent values
+        self.store_btn.setChecked(self.currentContext.store_checkstate)
         self.layer_combobox.setLayer(self.currentContext.lyr)
         self.expression_field.setField(self.currentContext.expr)
         vol_flds = self.currentContext.vol_flds
@@ -193,6 +221,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):  # type: igno
 
     # --------------------------- first tab connections -------------------------- #
 
+    @pyqtSlot()
     def layerChanged(self, lyr):
         self.currentContext.updateCreateContext(lyr=lyr)
         self.expression_field.setLayer(lyr)
@@ -203,49 +232,62 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):  # type: igno
             self.fields_combobox.addItemWithCheckState(field.name(), False)
         self.fields_combobox.setCheckedItems(self.currentContext.vol_flds)
 
+    @pyqtSlot()
     def alphaChanged(self, alpha):
         self.currentContext.updateCreateContext(alpha=alpha)
     
+    @pyqtSlot()
     def stop_dstChanged(self, stop_dst):
         self.currentContext.updateCreateContext(stop_dst=stop_dst)
     
+    @pyqtSlot()
     def geomNChanged(self, geom_n):
         self.currentContext.updateCreateContext(geom_n=geom_n)
     
+    @pyqtSlot()
     def expressionChanged(self, expr, valid=False):
         if valid:
             self.currentContext.updateCreateContext(expr=expr)
         else:
             pass
     
+    @pyqtSlot()
     def fieldChanged(self, fieldlist):
         self.currentContext.updateCreateContext(vol_flds=fieldlist)
     
+    @pyqtSlot()
     def crsChanged(self, crs):
         self.currentContext.updateCreateContext(proj=crs)
 
     # -------------------------- second tab connections -------------------------- #
 
+    @pyqtSlot()
     def displayFieldChanged(self, display_flds):
         self.currentContext.updateStyleContext(display_flds=display_flds)
     
+    @pyqtSlot()
     def useTotalFlow(self, state):
         self.currentContext.updateStyleContext(use_total_flow=state)
         self.scale_attr.setEnabled(False)
 
+    @pyqtSlot()
     def useAttr(self, state):
         self.currentContext.updateStyleContext(use_scale_attr=state)
         self.scale_attr.setEnabled(True)
 
+    @pyqtSlot()
     def scaleAttrChanged(self, scale_attr):
         self.currentContext.updateStyleContext(scale_attr=scale_attr)
 
+    @pyqtSlot()
     def minFlowChanged(self, min_flow):
         self.currentContext.updateStyleContext(min_flow=min_flow)
 
+    @pyqtSlot()
     def maxFlowChanged(self, max_flow):
         self.currentContext.updateStyleContext(max_flow=max_flow)
 
+    @pyqtSlot()
     def updateMinMax(self):
         attrname = self.currentContext.scale_attr
         out_lyr = self.currentContext.out_lyr
@@ -254,22 +296,28 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):  # type: igno
         self.min_flow.setValue(min)
         self.max_flow.setValue(max)
 
+    @pyqtSlot()
     def minWidthChanged(self, min_width):
         self.currentContext.updateStyleContext(min_width=min_width)
 
+    @pyqtSlot()
     def maxWidthChanged(self, max_width):
         self.currentContext.updateStyleContext(max_width=max_width)
 
+    @pyqtSlot()
     def softScaleChanged(self, state):
         state = True if state == 2 else False
         self.currentContext.updateStyleContext(soft_scale=state)
 
+    @pyqtSlot()
     def splineNChanged(self, spline_n):
         self.currentContext.updateStyleContext(spline_n=spline_n)
 
+    @pyqtSlot()
     def colorChanged(self, color):
         self.currentContext.updateStyleContext(color=color)
 
+    @pyqtSlot()
     def unitsChanged(self, unit):
         self.currentContext.updateStyleContext(units=unit)
 
@@ -320,6 +368,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):  # type: igno
         out_lyr.setRenderer(QgsSingleSymbolRenderer(symbol))
         out_lyr.triggerRepaint()
 
+    @pyqtSlot()
     def symbolizeLayer(self):
         self.calculateWidthAttributes()
         kwargs = self.currentContext.getStyleKwargs()
@@ -327,14 +376,22 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):  # type: igno
         # self.currentContext.setSymbol(symbol)
 
     # --------------------------- third tab connections -------------------------- #
-
+    
+    @pyqtSlot()
     def addLayerProperties(self, *args, **kwargs):
         for context in self.contexts:
             props = context.getSaveKwargs()
             for key, value in props.items():
                 context.out_lyr.setCustomProperty(self._proproot + key, value)
 
-
+    @pyqtSlot()
+    def onProjectReset(self):
+        try:
+            QgsProject.instance().writeProject.disconnect(self.addLayerProperties)
+        except TypeError as err:
+            print(f'disconnect write: {err}')
+        self.deleteLater()
+    
     def closeEvent(self, event):
         self.closingPlugin.emit()
         event.accept()
@@ -342,7 +399,7 @@ class FlowMapBuilderDockWidget(QtWidgets.QDockWidget, FORM_CLASS):  # type: igno
 FORM_CLASS2, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'add_dialog_widget.ui'))
 
-class AddDialogWidget(QtWidgets.QDialog, FORM_CLASS2):  # type: ignore
+class AddDialogWidget(QtWidgets.QDialog, FORM_CLASS2):
 
     def __init__(self, parent=None, dock=None):
         super(AddDialogWidget, self).__init__(parent)
@@ -357,6 +414,13 @@ class AddDialogWidget(QtWidgets.QDialog, FORM_CLASS2):  # type: ignore
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
     
+    def __del__(self):
+        # TODO: find correct deconstructor
+        del self.unpack_state
+        del self.layer_check
+        del self.buttonBox
+        del self.name_area
+
     def setName(self, name):
         self.namestring=name
     

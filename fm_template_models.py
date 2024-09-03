@@ -1,9 +1,11 @@
-from qgis.core import QgsMessageLog
-from qgis.core import QgsMapLayer, QgsProject
+from qgis.core import QgsMapLayer, QgsMessageLog, QgsProject, QgsCoordinateReferenceSystem
+
 
 class SpiralTreeContext:
 
-    def __init__(self, namestring="", proj=None):
+    def __init__(self, namestring: str, proj: QgsCoordinateReferenceSystem):
+        self.store_checkstate = False
+        
         self.namestring = namestring
         self.lyr = None
         self.expr = None
@@ -91,7 +93,7 @@ class SpiralTreeContext:
             "alpha": self.alpha,
             "stop_dst": self.stop_dst,
             "geom_n": self.geom_n,
-            "proj": self.proj
+            "proj": self.proj.toWkt()
         }
     
     def getScaleKwargs(self):
@@ -125,12 +127,12 @@ class SpiralTreeContext:
     @classmethod
     def fromSaveKwargs(cls, **kwargs):
         project = QgsProject.instance()
-        context = cls()
+        context = cls(kwargs['namestring'], kwargs['proj'])
         for key, value in kwargs.items():
             if key[-3:] == "lyr":
                 value = project.mapLayer(value)
                 if value is None:
-                    raise ValueError("Layer with this ID is noot registered")
+                    raise ValueError("Layer with this ID is not registered")
             setattr(context, key, value)
         return context
 
@@ -149,7 +151,20 @@ class SpiralTreeContext:
         self.symbol = symbol
 
     def log(self):
-        QgsMessageLog.logMessage(f'namestring {self.namestring}\nlyr {self.lyr}\nexpr {self.expr}\nvol_flds {self.vol_flds}\nalpha {self.alpha}\nproj {self.proj}')
+        QgsMessageLog.logMessage(f'''
+                                 namestring: {self.namestring}
+                                 lyr: {self.lyr}
+                                 expr: {self.expr}
+                                 vol_flds: {self.vol_flds}
+                                 alpha: {self.alpha}
+                                 proj: {makeLoggable(self.proj)}
+                                 store_checkstate: {self.store_checkstate}
+                                 ''')
 
     def __repr__(self):
         return self.namestring
+
+def makeLoggable(string):
+    if not isinstance(string, str):
+        string = str(string)
+    return string.replace('>', '').replace('<','')

@@ -21,9 +21,9 @@
  *                                                                         *
  ***************************************************************************/
 """
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, Qt  # type: ignore
-from qgis.PyQt.QtGui import QIcon  # type: ignore
-from qgis.PyQt.QtWidgets import QAction  # type: ignore
+from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, Qt, pyqtSlot
+from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtWidgets import QAction
 from qgis.core import QgsProject
 # Initialize Qt resources from file resources.py
 from .resources import *
@@ -196,23 +196,27 @@ class FlowMapBuilder:
         self.pluginIsActive = False
 
     def onProjectReset(self):
-        if not self.dockwidget is None:
+        if self.dockwidget is not None:
+            self.dockwidget = None
+        self.pluginIsActive = False
+    
+    def closePlugin(self):
+        if self.dockwidget is not None:
             try:
-                QgsProject.instance().writeProject.disconnect(self.dockwidget.addLayerProperties)
-                self.dockwidget = None
-            except TypeError:
-                pass
+                QgsProject.instance().cleared.disconnect(self.dockwidget.onProjectReset)
+                QgsProject.instance().cleared.disconnect(self.onProjectReset)
+            except TypeError as err:
+                print(f'disconnect reset: {err}')
+            self.dockwidget.deleteLater()
+            self.dockwidget = None
+            self.pluginIsActive = False
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
 
-        #print "** UNLOAD FlowMapBuilder"
+        print("** UNLOAD FlowMapBuilder")
 
-        self.onProjectReset()
-        try:
-            QgsProject.instance().cleared.disconnect(self.onProjectReset)
-        except TypeError:
-            pass
+        self.closePlugin()
 
         for action in self.actions:
             self.iface.removePluginMenu(
@@ -226,7 +230,6 @@ class FlowMapBuilder:
 
     def run(self):
         """Run method that loads and starts the plugin"""
-
         if not self.pluginIsActive:
             self.pluginIsActive = True
 

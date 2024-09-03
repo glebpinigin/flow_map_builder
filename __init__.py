@@ -24,7 +24,7 @@
 """
 
 import sys, os
-sys.path.insert(0, str(os.path.join(os.path.dirname(os.path.realpath(__file__)), ''))+'\\flowmapper')
+sys.path.insert(0, str(os.path.join(os.path.dirname(os.path.realpath(__file__)), ''))+'/flowmapper')
 
 # noinspection PyPep8Naming
 def classFactory(iface):  # pylint: disable=invalid-name
